@@ -1,6 +1,6 @@
 # Cloudflare mTLS CLI
 
-Python CLI for managing Cloudflare mTLS certificates and hostname associations, following the same simple style as `cloudflare-page-rules-cli`.
+Python CLI for managing Cloudflare mTLS certificates and hostname associations.
 
 ## Overview
 
