@@ -7,13 +7,13 @@ Python CLI for managing Cloudflare mTLS certificates and hostname associations.
 The script can:
 
 - list zones accessible to the token
-- list mTLS certificates for an account
-- fetch a single certificate by ID
-- upload a PEM bundle to Cloudflare mTLS Certificate Management
-- list hostname associations for a zone
-- replace hostname associations for a zone
-- list Cloudflare services currently using a certificate
-- delete a certificate when it is no longer in use
+- list certificates
+- get one certificate
+- upload a PEM bundle
+- list hostname associations
+- replace hostname associations
+- list certificate associations
+- delete a certificate
 
 ## Requirements
 
@@ -24,7 +24,7 @@ The script can:
 
 No package install is required for runtime if you already have Python 3 available.
 
-If needed, you can still use a virtual environment:
+If needed:
 
 ```bash
 python3 -m venv .venv
@@ -50,9 +50,9 @@ Recommended permissions:
 
 Recommended token scope:
 
-- include the target account for mTLS certificate management
-- include the target zone for hostname association management
-- if you use `zones` or `--zone-name`, the token also needs access to read those zones
+- include the target account
+- include the target zone
+- if you use `zones` or `--zone-name`, the token also needs zone read access
 
 ## Configuration
 
@@ -109,7 +109,6 @@ Examples:
 
 ```bash
 python3 mtls_cli.py zones
-python3 mtls_cli.py zones --name-contains example
 ```
 
 ### `certificates`
@@ -120,12 +119,11 @@ Examples:
 
 ```bash
 python3 mtls_cli.py certificates --account-id ACCOUNT_ID
-python3 mtls_cli.py certificates --account-id ACCOUNT_ID --type custom
 ```
 
 ### `certificate`
 
-Fetches a single certificate by ID.
+Gets one certificate by ID.
 
 Examples:
 
@@ -135,7 +133,7 @@ python3 mtls_cli.py certificate --account-id ACCOUNT_ID --mtls-certificate-id CE
 
 ### `upload-certificate`
 
-Uploads a PEM bundle to the account mTLS certificate store.
+Uploads a PEM bundle.
 
 Examples:
 
@@ -146,29 +144,27 @@ python3 mtls_cli.py upload-certificate --account-id ACCOUNT_ID --bundle ca.pem -
 
 ### `associations`
 
-Lists hostname associations for a zone. You can use either `--zone-id` or `--zone-name`.
+Lists hostname associations for a zone.
 
 Examples:
 
 ```bash
 python3 mtls_cli.py associations --zone-name example.com --mtls-certificate-id CERT_ID
-python3 mtls_cli.py associations --zone-id ZONE_ID
 ```
 
 ### `replace-associations`
 
-Replaces the full hostname association list for the target zone and certificate.
+Replaces the hostname association list for a zone.
 
 Examples:
 
 ```bash
 python3 mtls_cli.py replace-associations --zone-name example.com --mtls-certificate-id CERT_ID --hostnames app.example.com api.example.com
-python3 mtls_cli.py replace-associations --zone-id ZONE_ID --hostnames service.example.com
 ```
 
 ### `certificate-associations`
 
-Lists active Cloudflare services currently using a certificate.
+Lists certificate associations.
 
 Examples:
 
@@ -178,7 +174,7 @@ python3 mtls_cli.py certificate-associations --account-id ACCOUNT_ID --mtls-cert
 
 ### `delete-certificate`
 
-Deletes a certificate from the account if it is no longer associated with active services.
+Deletes a certificate.
 
 Examples:
 
