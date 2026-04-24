@@ -35,6 +35,7 @@ ASSOCIATIONS_EPILOG = """Examples:
 REPLACE_ASSOCIATIONS_EPILOG = """Examples:
   python3 mtls_cli.py replace-associations --zone-name example.com --mtls-certificate-id CERT_ID --hostnames app.example.com api.example.com
   python3 mtls_cli.py replace-associations --zone-id ZONE_ID --hostnames app.example.com api.example.com
+  python3 mtls_cli.py replace-associations --zone-name example.com --mtls-certificate-id CERT_ID --clear
 """
 CERTIFICATE_ASSOCIATIONS_EPILOG = """Examples:
   python3 mtls_cli.py certificate-associations --account-id ACCOUNT_ID --mtls-certificate-id CERT_ID
@@ -304,7 +305,8 @@ def build_parser() -> argparse.ArgumentParser:
     replace_parser.add_argument("--zone-id", default="", help="Cloudflare zone ID.")
     replace_parser.add_argument("--zone-name", default="", help="Zone name. Example: example.com")
     replace_parser.add_argument("--mtls-certificate-id", default="", help="mTLS certificate ID.")
-    replace_parser.add_argument("--hostnames", nargs="+", required=True, help="Hostnames separated by space.")
+    replace_parser.add_argument("--hostnames", nargs="+", default=[], help="Hostnames separated by space.")
+    replace_parser.add_argument("--clear", action="store_true", help="Remove all hostname associations.")
 
     certificate_associations_parser = subparsers.add_parser(
         "certificate-associations",
@@ -428,8 +430,12 @@ def main() -> int:
 
     if args.command == "replace-associations":
         hostnames = parse_hostnames(args.hostnames)
-        if not hostnames:
-            raise SystemExit("Provide at least one hostname in --hostnames.")
+        if args.clear and hostnames:
+            raise SystemExit("Use either --hostnames or --clear.")
+        if not args.clear and not hostnames:
+            raise SystemExit("Provide --hostnames or use --clear.")
+        if args.clear:
+            hostnames = []
 
         body = {"hostnames": hostnames}
         if args.mtls_certificate_id.strip():

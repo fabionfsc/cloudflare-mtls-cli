@@ -24,20 +24,6 @@ The script can:
 
 No package install is required for runtime if you already have Python 3 available.
 
-If needed:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-On Debian/Ubuntu systems, if `venv` is missing:
-
-```bash
-sudo apt update
-sudo apt install python3-venv
-```
-
 ## Token Permissions
 
 Recommended permissions:
@@ -160,6 +146,7 @@ Examples:
 
 ```bash
 python3 mtls_cli.py replace-associations --zone-name example.com --mtls-certificate-id CERT_ID --hostnames app.example.com api.example.com
+python3 mtls_cli.py replace-associations --zone-name example.com --mtls-certificate-id CERT_ID --clear
 ```
 
 ### `certificate-associations`
@@ -177,6 +164,34 @@ python3 mtls_cli.py certificate-associations --account-id ACCOUNT_ID --mtls-cert
 Deletes a certificate.
 
 Examples:
+
+```bash
+python3 mtls_cli.py delete-certificate --account-id ACCOUNT_ID --mtls-certificate-id CERT_ID
+```
+
+## Delete Flow
+
+If `delete-certificate` fails because the certificate is in use:
+
+1. Check certificate associations:
+
+```bash
+python3 mtls_cli.py certificate-associations --account-id ACCOUNT_ID --mtls-certificate-id CERT_ID
+```
+
+2. Find the hostname associations in the zone:
+
+```bash
+python3 mtls_cli.py associations --zone-name example.com --mtls-certificate-id CERT_ID
+```
+
+3. Clear the hostname associations:
+
+```bash
+python3 mtls_cli.py replace-associations --zone-name example.com --mtls-certificate-id CERT_ID --clear
+```
+
+4. Delete the certificate:
 
 ```bash
 python3 mtls_cli.py delete-certificate --account-id ACCOUNT_ID --mtls-certificate-id CERT_ID
