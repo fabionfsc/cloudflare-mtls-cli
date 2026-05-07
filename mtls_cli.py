@@ -14,6 +14,7 @@ API_BASE = "https://api.cloudflare.com/client/v4"
 HELP_EPILOG = """Examples:
   python3 mtls_cli.py zones
   python3 mtls_cli.py certificates --account-id ACCOUNT_ID
+  python3 mtls_cli.py retrieve-certificate --account-id ACCOUNT_ID --mtls-certificate-id CERT_ID
   python3 mtls_cli.py upload-certificate --account-id ACCOUNT_ID --bundle ca.pem
   python3 mtls_cli.py associations --zone-name example.com --mtls-certificate-id CERT_ID
   python3 mtls_cli.py replace-associations --zone-name example.com --mtls-certificate-id CERT_ID --hostnames app.example.com api.example.com
@@ -23,6 +24,10 @@ ZONES_EPILOG = """Examples:
 """
 CERTIFICATES_EPILOG = """Examples:
   python3 mtls_cli.py certificates --account-id ACCOUNT_ID
+"""
+RETRIEVE_CERTIFICATE_EPILOG = """Examples:
+  python3 mtls_cli.py retrieve-certificate --account-id ACCOUNT_ID --mtls-certificate-id CERT_ID
+  python3 mtls_cli.py retrieve-certificate --account-id ACCOUNT_ID --mtls-certificate-id CERT_ID --output ca.pem
 """
 UPLOAD_CERTIFICATE_EPILOG = """Examples:
   python3 mtls_cli.py upload-certificate --account-id ACCOUNT_ID --bundle ca.pem
@@ -217,6 +222,26 @@ def print_certificate(certificate: dict) -> None:
     print(f"Expires On: {certificate.get('expires_on', '-')}")
 
 
+def get_certificate_pem(certificate: dict) -> str:
+    pem = str(certificate.get("certificates") or certificate.get("certificate") or "").strip()
+    if not pem:
+        raise SystemExit("Cloudflare response did not include a certificate PEM.")
+    return f"{pem}\n"
+
+
+def print_or_write_certificate_pem(certificate: dict, output: str) -> None:
+    pem = get_certificate_pem(certificate)
+    output = (output or "").strip()
+
+    if not output:
+        print(pem, end="")
+        return
+
+    output_path = Path(output)
+    output_path.write_text(pem, encoding="utf-8")
+    print(f"Certificate PEM written to: {output_path}")
+
+
 def print_hostnames(hostnames: list[str]) -> None:
     if not hostnames:
         print("No hostname associations found.")
@@ -274,6 +299,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     certificate_parser.add_argument("--account-id", required=True, help="Cloudflare account ID.")
     certificate_parser.add_argument("--mtls-certificate-id", required=True, help="mTLS certificate ID.")
+
+    retrieve_certificate_parser = subparsers.add_parser(
+        "retrieve-certificate",
+        help="Retrieve one certificate PEM.",
+        epilog=RETRIEVE_CERTIFICATE_EPILOG,
+        formatter_class=HelpFormatter,
+    )
+    retrieve_certificate_parser.add_argument("--account-id", required=True, help="Cloudflare account ID.")
+    retrieve_certificate_parser.add_argument("--mtls-certificate-id", required=True, help="mTLS certificate ID.")
+    retrieve_certificate_parser.add_argument(
+        "--output",
+        default="",
+        help="Optional output file. Defaults to stdout.",
+    )
 
     upload_parser = subparsers.add_parser(
         "upload-certificate",
@@ -364,6 +403,16 @@ def main() -> int:
             verify,
         )
         print_certificate(certificate)
+        return 0
+
+    if args.command == "retrieve-certificate":
+        certificate = api_request(
+            api_token,
+            "GET",
+            f"/accounts/{args.account_id}/mtls_certificates/{args.mtls_certificate_id}",
+            verify,
+        )
+        print_or_write_certificate_pem(certificate, args.output)
         return 0
 
     if args.command == "upload-certificate":

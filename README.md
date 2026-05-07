@@ -9,6 +9,7 @@ The script can:
 - list zones accessible to the token
 - list certificates
 - get one certificate
+- retrieve one certificate PEM
 - upload a PEM bundle
 - list hostname associations
 - replace hostname associations
@@ -80,6 +81,7 @@ Terminal help:
 
 ```bash
 python3 mtls_cli.py --help
+python3 mtls_cli.py retrieve-certificate --help
 python3 mtls_cli.py upload-certificate --help
 python3 mtls_cli.py associations --help
 python3 mtls_cli.py replace-associations --help
@@ -115,6 +117,17 @@ Examples:
 
 ```bash
 python3 mtls_cli.py certificate --account-id ACCOUNT_ID --mtls-certificate-id CERT_ID
+```
+
+### `retrieve-certificate`
+
+Retrieves one certificate PEM by ID. By default, it prints only the PEM bundle to stdout.
+
+Examples:
+
+```bash
+python3 mtls_cli.py retrieve-certificate --account-id ACCOUNT_ID --mtls-certificate-id CERT_ID
+python3 mtls_cli.py retrieve-certificate --account-id ACCOUNT_ID --mtls-certificate-id CERT_ID --output ca.pem
 ```
 
 ### `upload-certificate`
