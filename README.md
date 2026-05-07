@@ -19,7 +19,6 @@ The script can:
 ## Requirements
 
 - Python 3
-- no third-party runtime dependency
 
 ## Installation
 
